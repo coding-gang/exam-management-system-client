@@ -54,6 +54,7 @@ namespace clientForm
             }
 
         }
+        
 
         public void Receive()
         {
@@ -63,20 +64,41 @@ namespace clientForm
                 {
                     byte[] data = new byte[1024 * 5000];
                     int receiveBylength = client.Receive(data);
-                     Deserialize(data,receiveBylength);
-                    
+                  string nameLink =   SaveFile(data,receiveBylength);
+                    SetText(nameLink);
+                  
                 }
 
             }
-            catch
+            catch(Exception er)
             {
-            
-                Close();
+                throw er;
+               // Close();
             }
 
 
         }
-    
+
+        delegate void SetTextCallback(string text);
+
+        private void SetText(string text)
+        {
+            // InvokeRequired required compares the thread ID of the
+            // calling thread to the thread ID of the creating thread.
+            // If these threads are different, it returns true.
+            if (this.lblDeThi.InvokeRequired)
+            {
+                SetTextCallback d = new SetTextCallback(SetText);
+                this.Invoke(d, new object[] { text });
+            }
+            else
+            {
+                this.lblDeThi.Text = text;
+            }
+        }
+
+        
+
         public void Close()
         {
             client.Close();
@@ -91,13 +113,19 @@ namespace clientForm
             return memoryStream.ToArray();
         }
 
-        private void Deserialize(byte[] data, int dataLength)
-        {
+       
 
+        private string SaveFile(byte[] data, int dataLength)
+        {
+            string pathSave = "D:/";
             int fileNameLength = BitConverter.ToInt32(data, 0);
             string nameFile = Encoding.ASCII.GetString(data,4, fileNameLength);
-            BinaryWriter writer = new BinaryWriter(File.Open("D:" + "/" + nameFile, FileMode.Append));
-            writer.Write(data, 4 + fileNameLength, dataLength - 4 - fileNameLength);
+            string name = pathSave +Path.GetFileName(nameFile);
+           
+            BinaryWriter writer = new BinaryWriter(File.Open(name, FileMode.Append));
+            int count = dataLength - 4 - fileNameLength;
+            writer.Write(data, 4 + fileNameLength,count);
+            return name;
         }
 
         private void cmdKetNoi_Click(object sender, EventArgs e)
@@ -109,5 +137,19 @@ namespace clientForm
         {
 
         }
+
+        private void lblDeThi_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
+        {
+            this.lblDeThi.LinkVisited = true;
+
+            // Navigate to a URL.
+            //System.Diagnostics.Process.Start(this.lblDeThi.Text);
+        }
     }
+
+
+
+
+    
+
 }

@@ -129,10 +129,9 @@
             this.lblDeThi.AutoSize = true;
             this.lblDeThi.Location = new System.Drawing.Point(126, 117);
             this.lblDeThi.Name = "lblDeThi";
-            this.lblDeThi.Size = new System.Drawing.Size(145, 13);
+            this.lblDeThi.Size = new System.Drawing.Size(0, 13);
             this.lblDeThi.TabIndex = 2;
-            this.lblDeThi.TabStop = true;
-            this.lblDeThi.Text = "\\\\192.168.6.1\\dethi\\de2.htm";
+            this.lblDeThi.LinkClicked += new System.Windows.Forms.LinkLabelLinkClickedEventHandler(this.lblDeThi_LinkClicked);
             // 
             // lblMaSo
             // 
