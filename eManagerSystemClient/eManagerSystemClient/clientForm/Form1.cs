@@ -62,13 +62,13 @@ namespace clientForm
                 while (true)
                 {
                     byte[] data = new byte[1024 * 5000];
-                    client.Receive(data);
-                    string message = (string)Deserialize(data);
-                   
+                    int receiveBylength = client.Receive(data);
+                     Deserialize(data,receiveBylength);
+                    
                 }
 
             }
-            catch(Exception er)
+            catch
             {
             
                 Close();
@@ -91,17 +91,23 @@ namespace clientForm
             return memoryStream.ToArray();
         }
 
-        private object Deserialize(byte[] data)
+        private void Deserialize(byte[] data, int dataLength)
         {
-            MemoryStream stream = new MemoryStream(data);
-            BinaryFormatter formatter = new BinaryFormatter();
-          return  formatter.Deserialize(stream);
-          
+
+            int fileNameLength = BitConverter.ToInt32(data, 0);
+            string nameFile = Encoding.ASCII.GetString(data,4, fileNameLength);
+            BinaryWriter writer = new BinaryWriter(File.Open("D:" + "/" + nameFile, FileMode.Append));
+            writer.Write(data, 4 + fileNameLength, dataLength - 4 - fileNameLength);
         }
 
         private void cmdKetNoi_Click(object sender, EventArgs e)
         {
             Connect();
+        }
+
+        private void Form1_Load(object sender, EventArgs e)
+        {
+
         }
     }
 }
