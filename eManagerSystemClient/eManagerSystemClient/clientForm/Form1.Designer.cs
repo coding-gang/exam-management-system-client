@@ -102,6 +102,7 @@
             this.cmdNopBaiThi.TabIndex = 10;
             this.cmdNopBaiThi.Text = "Nộp Bài Thi";
             this.cmdNopBaiThi.UseVisualStyleBackColor = true;
+            this.cmdNopBaiThi.Click += new System.EventHandler(this.cmdNopBaiThi_Click);
             // 
             // groupBox2
             // 

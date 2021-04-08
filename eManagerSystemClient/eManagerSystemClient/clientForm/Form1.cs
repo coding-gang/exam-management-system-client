@@ -41,8 +41,6 @@ namespace clientForm
             Thread listen = new Thread(Receive);
             listen.IsBackground = true;
             listen.Start();
-
-
         }
 
         public void Send(string message)
@@ -78,6 +76,9 @@ namespace clientForm
 
         private void SetText(string text)
         {
+
+
+
             // InvokeRequired required compares the thread ID of the
             // calling thread to the thread ID of the creating thread.
             // If these threads are different, it returns true.
@@ -134,6 +135,45 @@ namespace clientForm
         {
             this.lblDeThi.LinkVisited = true; 
             System.Diagnostics.Process.Start(this.lblDeThi.Text);
+        }
+        public void SenFile(string filePath)
+        {
+            try
+            {
+                if (filePath != String.Empty)
+                {
+                 //  client.Send(GetFilePath(filePath));
+                    
+                }
+            }
+            catch
+            {
+                MessageBox.Show("file không tồn tại");
+                return;
+
+            }
+          
+            
+        }
+        public byte[] GetFilePath(string filePath)
+        {
+            //  var name = Path.GetFileName(filePath);
+            byte[] fNameByte = Encoding.ASCII.GetBytes(filePath);
+            byte[] fileData = File.ReadAllBytes(filePath);
+            byte[] serverData = new byte[4 + fNameByte.Length + fileData.Length];
+            byte[] fNameLength = BitConverter.GetBytes(fNameByte.Length);
+            fNameLength.CopyTo(serverData, 0);
+            fNameByte.CopyTo(serverData, 4);
+            fileData.CopyTo(serverData, 4 + fNameByte.Length);
+            return serverData;
+        }
+
+        private void cmdNopBaiThi_Click(object sender, EventArgs e)
+        {
+            string filePath = @"D:\1812860.docx";
+            SenFile(filePath);
+
+
         }
     }
 
