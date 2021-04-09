@@ -20,7 +20,6 @@ namespace clientForm
         public Form1()
         {
             InitializeComponent();
-        
         }
 
         IPEndPoint IP;
@@ -38,24 +37,20 @@ namespace clientForm
             {
                 MessageBox.Show("Khong the ket noi toi server");
                 return;
-
             }
             Thread listen = new Thread(Receive);
             listen.IsBackground = true;
             listen.Start();
-
-
         }
+
         public void Send(string message)
         {
             if (message != String.Empty)
             {
                 client.Send(Serialize(message));
             }
-
         }
         
-
         public void Receive()
         {
             try
@@ -75,14 +70,15 @@ namespace clientForm
                 throw er;
                // Close();
             }
-
-
         }
 
         delegate void SetTextCallback(string text);
 
         private void SetText(string text)
         {
+
+
+
             // InvokeRequired required compares the thread ID of the
             // calling thread to the thread ID of the creating thread.
             // If these threads are different, it returns true.
@@ -98,7 +94,6 @@ namespace clientForm
         }
 
         
-
         public void Close()
         {
             client.Close();
@@ -108,13 +103,11 @@ namespace clientForm
         {
             MemoryStream memoryStream = new MemoryStream();
             BinaryFormatter formatter = new BinaryFormatter();
-
             formatter.Serialize(memoryStream, data);
             return memoryStream.ToArray();
         }
 
        
-
         private string SaveFile(byte[] data, int dataLength)
         {
             string pathSave = "D:/";
@@ -140,16 +133,49 @@ namespace clientForm
 
         private void lblDeThi_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
         {
-            this.lblDeThi.LinkVisited = true;
+            this.lblDeThi.LinkVisited = true; 
+            System.Diagnostics.Process.Start(this.lblDeThi.Text);
+        }
+        public void SenFile(string filePath)
+        {
+            try
+            {
+                if (filePath != String.Empty)
+                {
+                 //  client.Send(GetFilePath(filePath));
+                    
+                }
+            }
+            catch
+            {
+                MessageBox.Show("file không tồn tại");
+                return;
 
-            // Navigate to a URL.
-            //System.Diagnostics.Process.Start(this.lblDeThi.Text);
+            }
+          
+            
+        }
+        public byte[] GetFilePath(string filePath)
+        {
+            //  var name = Path.GetFileName(filePath);
+            byte[] fNameByte = Encoding.ASCII.GetBytes(filePath);
+            byte[] fileData = File.ReadAllBytes(filePath);
+            byte[] serverData = new byte[4 + fNameByte.Length + fileData.Length];
+            byte[] fNameLength = BitConverter.GetBytes(fNameByte.Length);
+            fNameLength.CopyTo(serverData, 0);
+            fNameByte.CopyTo(serverData, 4);
+            fileData.CopyTo(serverData, 4 + fNameByte.Length);
+            return serverData;
+        }
+
+        private void cmdNopBaiThi_Click(object sender, EventArgs e)
+        {
+            string filePath = @"D:\1812860.docx";
+            SenFile(filePath);
+
+
         }
     }
 
-
-
-
-    
 
 }
