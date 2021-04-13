@@ -12,6 +12,7 @@ using System.Net.Sockets;
 using System.Threading;
 using System.IO;
 using System.Runtime.Serialization.Formatters.Binary;
+using eManagerSystem.Application;
 namespace clientForm
 {
     public partial class Form1 : Form
@@ -29,7 +30,7 @@ namespace clientForm
         {
 
             IP = new IPEndPoint(IPAddress.Parse("127.0.0.1"), 9999);
-            client = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.IP);
+            client = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
             try
             {
                 client.Connect(IP);
@@ -54,7 +55,15 @@ namespace clientForm
             }
 
         }
-        
+
+        public object Deserialize(byte[] data)
+        {
+            MemoryStream stream = new MemoryStream(data);
+            BinaryFormatter formatter = new BinaryFormatter();
+         
+            return formatter.Deserialize(stream);
+          
+        }
 
         public void Receive()
         {
@@ -63,10 +72,24 @@ namespace clientForm
                 while (true)
                 {
                     byte[] data = new byte[1024 * 5000];
-                    int receiveBylength = client.Receive(data);
-                  string nameLink =   SaveFile(data,receiveBylength);
-                    SetText(nameLink);
-                  
+                     client.Receive(data);
+
+                    SendData receiveData = new SendData();
+                    receiveData = (SendData)Deserialize(data);
+                    if ((string)Deserialize(receiveData.option) == "Send File")
+                    {
+
+                        int receiveBylength = receiveData.data.Length;
+                     
+                        string nameLink = SaveFile(receiveData.data, receiveBylength);
+                        SetText(nameLink);
+                    }else if ((string)Deserialize(receiveData.option) == "Send User")
+                    {
+                         var userList =  (List<Students>)Deserialize(receiveData.data);
+                         SetData(userList);
+                    }
+
+
                 }
 
             }
@@ -97,7 +120,27 @@ namespace clientForm
             }
         }
 
-        
+        delegate void SetDataSourceCallBack(List<Students> students);
+
+        private void SetData(List<Students> students)
+        {
+            // InvokeRequired required compares the thread ID of the
+            // calling thread to the thread ID of the creating thread.
+            // If these threads are different, it returns true.
+            if (this.cbDSThi.InvokeRequired)
+            {
+                SetDataSourceCallBack d = new SetDataSourceCallBack(SetData);
+                this.Invoke(d, new object[] { students });
+            }
+            else
+            {
+                this.cbDSThi.DataSource = students;        
+                this.cbDSThi.DisplayMember = "FirstName";
+                this.cbDSThi.ValueMember = "Id";
+            }
+        }
+
+
 
         public void Close()
         {
@@ -110,11 +153,11 @@ namespace clientForm
             BinaryFormatter formatter = new BinaryFormatter();
 
             formatter.Serialize(memoryStream, data);
+        
             return memoryStream.ToArray();
         }
 
        
-
         private string SaveFile(byte[] data, int dataLength)
         {
             string pathSave = "D:/";
@@ -141,9 +184,7 @@ namespace clientForm
         private void lblDeThi_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
         {
             this.lblDeThi.LinkVisited = true;
-
-            // Navigate to a URL.
-            //System.Diagnostics.Process.Start(this.lblDeThi.Text);
+            System.Diagnostics.Process.Start(this.lblDeThi.Text);
         }
     }
 
