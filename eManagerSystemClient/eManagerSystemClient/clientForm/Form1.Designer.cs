@@ -138,9 +138,8 @@
             this.lblMaSo.AutoSize = true;
             this.lblMaSo.Location = new System.Drawing.Point(126, 47);
             this.lblMaSo.Name = "lblMaSo";
-            this.lblMaSo.Size = new System.Drawing.Size(49, 13);
+            this.lblMaSo.Size = new System.Drawing.Size(0, 13);
             this.lblMaSo.TabIndex = 1;
-            this.lblMaSo.Text = "0313769";
             // 
             // lblThoiGianConLai
             // 
@@ -165,18 +164,16 @@
             this.lblMonThi.AutoSize = true;
             this.lblMonThi.Location = new System.Drawing.Point(126, 71);
             this.lblMonThi.Name = "lblMonThi";
-            this.lblMonThi.Size = new System.Drawing.Size(82, 13);
+            this.lblMonThi.Size = new System.Drawing.Size(0, 13);
             this.lblMonThi.TabIndex = 1;
-            this.lblMonThi.Text = "Lập Trình Mạng";
             // 
             // lblHoTen
             // 
             this.lblHoTen.AutoSize = true;
             this.lblHoTen.Location = new System.Drawing.Point(126, 25);
             this.lblHoTen.Name = "lblHoTen";
-            this.lblHoTen.Size = new System.Drawing.Size(77, 13);
+            this.lblHoTen.Size = new System.Drawing.Size(0, 13);
             this.lblHoTen.TabIndex = 1;
-            this.lblHoTen.Text = "Phạm Duy Lộc";
             // 
             // label4
             // 

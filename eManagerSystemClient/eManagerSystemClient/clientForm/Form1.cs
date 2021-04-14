@@ -47,11 +47,17 @@ namespace clientForm
 
 
         }
-        public void Send(string message)
+        public void SendAcceptUser(string mssv)
         {
-            if (message != String.Empty)
+            if (mssv != String.Empty)
             {
-                client.Send(Serialize(message));
+                SendData sendData = new SendData
+                {
+                    option = Serialize("Send Accept"),
+                    data = Serialize(mssv)
+                };
+                
+                client.Send(Serialize(sendData));
             }
 
         }
@@ -80,13 +86,16 @@ namespace clientForm
                     {
                         case "Send File":
                             int receiveBylength = receiveData.data.Length;
-
                             string nameLink = SaveFile(receiveData.data, receiveBylength);
                             SetText(nameLink);
                             break;
                         case "Send User":
                             var userList = (List<Students>)Deserialize(receiveData.data);
                             SetData(userList);
+                            break;
+                        case "Send Subject":
+                            var subject = (string)Deserialize(receiveData.data);
+                            SetSubject(subject);
                             break;
                         default:
                             break;
@@ -97,15 +106,30 @@ namespace clientForm
             }
             catch(Exception er)
             {
-             
                 Close();
             }
 
 
         }
 
+
         delegate void SetTextCallback(string text);
 
+        private void SetSubject(string text)
+        {
+            // InvokeRequired required compares the thread ID of the
+            // calling thread to the thread ID of the creating thread.
+            // If these threads are different, it returns true.
+            if (this.lblMonThi.InvokeRequired)
+            {
+                SetTextCallback d = new SetTextCallback(SetSubject);
+                lblMonThi.Invoke(d, new object[] { text });
+            }
+            else
+            {
+                this.lblMonThi.Text = text;
+            }
+        }
         private void SetText(string text)
         {
             // InvokeRequired required compares the thread ID of the
@@ -114,7 +138,7 @@ namespace clientForm
             if (this.lblDeThi.InvokeRequired)
             {
                 SetTextCallback d = new SetTextCallback(SetText);
-                this.Invoke(d, new object[] { text });
+                lblDeThi.Invoke(d, new object[] { text });
             }
             else
             {
@@ -184,7 +208,17 @@ namespace clientForm
 
         private void cmdChapNhan_Click(object sender, EventArgs e)
         {
+            if(lblMaSo.Text != string.Empty)
+            {
+                SendAcceptUser(lblMaSo.Text);
+                MessageBox.Show("Ket noi success!");
 
+            }
+            else
+            {
+                MessageBox.Show("Ban chua chon Ten thi sinh");
+            }
+           
         }
 
         private void cbDSThi_SelectedIndexChanged(object sender, EventArgs e)
@@ -196,14 +230,10 @@ namespace clientForm
                 string MSSV = cbDSThi.SelectedValue.ToString();
                 if(MSSV != "eManagerSystem.Application.Students")
                 {
-                    MessageBox.Show(MSSV);
                     lblMaSo.Text = MSSV;
                     lblHoTen.Text = cbDSThi.Text;
                 }
-            
-
-        
-
+           
             }
         }
     }
