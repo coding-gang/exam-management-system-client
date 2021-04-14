@@ -20,5 +20,6 @@ namespace eManagerSystem.Application
 
         public int CurrentSubjectId { get; set; }
 
+        public string FullName { get { return LastName + FirstName; } }
     }
 }

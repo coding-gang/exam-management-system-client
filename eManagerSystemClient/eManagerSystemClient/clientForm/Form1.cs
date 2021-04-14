@@ -76,27 +76,29 @@ namespace clientForm
 
                     SendData receiveData = new SendData();
                     receiveData = (SendData)Deserialize(data);
-                    if ((string)Deserialize(receiveData.option) == "Send File")
+                    switch ((string)Deserialize(receiveData.option))
                     {
+                        case "Send File":
+                            int receiveBylength = receiveData.data.Length;
 
-                        int receiveBylength = receiveData.data.Length;
-                     
-                        string nameLink = SaveFile(receiveData.data, receiveBylength);
-                        SetText(nameLink);
-                    }else if ((string)Deserialize(receiveData.option) == "Send User")
-                    {
-                         var userList =  (List<Students>)Deserialize(receiveData.data);
-                         SetData(userList);
+                            string nameLink = SaveFile(receiveData.data, receiveBylength);
+                            SetText(nameLink);
+                            break;
+                        case "Send User":
+                            var userList = (List<Students>)Deserialize(receiveData.data);
+                            SetData(userList);
+                            break;
+                        default:
+                            break;
                     }
-
-
+                 
                 }
 
             }
             catch(Exception er)
             {
-                throw er;
-               // Close();
+             
+                Close();
             }
 
 
@@ -124,9 +126,7 @@ namespace clientForm
 
         private void SetData(List<Students> students)
         {
-            // InvokeRequired required compares the thread ID of the
-            // calling thread to the thread ID of the creating thread.
-            // If these threads are different, it returns true.
+          
             if (this.cbDSThi.InvokeRequired)
             {
                 SetDataSourceCallBack d = new SetDataSourceCallBack(SetData);
@@ -135,12 +135,10 @@ namespace clientForm
             else
             {
                 this.cbDSThi.DataSource = students;        
-                this.cbDSThi.DisplayMember = "FirstName";
-                this.cbDSThi.ValueMember = "Id";
+                this.cbDSThi.DisplayMember = "FullName";
+                this.cbDSThi.ValueMember = "MSSV";
             }
         }
-
-
 
         public void Close()
         {
@@ -176,15 +174,37 @@ namespace clientForm
             Connect();
         }
 
-        private void Form1_Load(object sender, EventArgs e)
-        {
-
-        }
+       
 
         private void lblDeThi_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
         {
             this.lblDeThi.LinkVisited = true;
             System.Diagnostics.Process.Start(this.lblDeThi.Text);
+        }
+
+        private void cmdChapNhan_Click(object sender, EventArgs e)
+        {
+
+        }
+
+        private void cbDSThi_SelectedIndexChanged(object sender, EventArgs e)
+        {
+
+            if (cbDSThi.SelectedItem != null)
+            {
+             
+                string MSSV = cbDSThi.SelectedValue.ToString();
+                if(MSSV != "eManagerSystem.Application.Students")
+                {
+                    MessageBox.Show(MSSV);
+                    lblMaSo.Text = MSSV;
+                    lblHoTen.Text = cbDSThi.Text;
+                }
+            
+
+        
+
+            }
         }
     }
 

@@ -261,6 +261,7 @@
             this.cmdChapNhan.TabIndex = 1;
             this.cmdChapNhan.Text = "Chấp Nhận";
             this.cmdChapNhan.UseVisualStyleBackColor = true;
+            this.cmdChapNhan.Click += new System.EventHandler(this.cmdChapNhan_Click);
             // 
             // cbDSThi
             // 
@@ -269,6 +270,7 @@
             this.cbDSThi.Name = "cbDSThi";
             this.cbDSThi.Size = new System.Drawing.Size(259, 21);
             this.cbDSThi.TabIndex = 0;
+            this.cbDSThi.SelectedIndexChanged += new System.EventHandler(this.cbDSThi_SelectedIndexChanged);
             // 
             // Form1
             // 
@@ -281,7 +283,6 @@
             this.Controls.Add(this.groupBox1);
             this.Name = "Form1";
             this.Text = "Form1";
-            this.Load += new System.EventHandler(this.Form1_Load);
             this.groupBox3.ResumeLayout(false);
             this.groupBox3.PerformLayout();
             this.groupBox2.ResumeLayout(false);
