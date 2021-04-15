@@ -37,8 +37,6 @@ namespace clientForm
             SetCounter(minute, second);
             if (counter == 0)
             {
-
-
                 countdown.Stop();
                 FinishExam();
                 Close();
@@ -49,9 +47,6 @@ namespace clientForm
         delegate void SetCounterCallback(int minute, int second);
         private void SetCounter(int minute, int second)
         {
-            // InvokeRequired required compares the thread ID of the
-            // calling thread to the thread ID of the creating thread.
-            // If these threads are different, it returns true.
             if (this.lblDeThi.InvokeRequired)
             {
                 SetCounterCallback d = new SetCounterCallback(SetCounter);
@@ -124,7 +119,6 @@ namespace clientForm
                 throw ex;
             }
 
-
         }
 
         public byte[] GetFilePath(string filePath)
@@ -142,8 +136,9 @@ namespace clientForm
         }
         public void Connect()
         {
-
-            IP = new IPEndPoint(IPAddress.Parse("127.0.0.1"), 9999);
+            string hostName = Dns.GetHostName();
+            string currentIP = Dns.GetHostByName(hostName).AddressList[0].ToString();
+            IP = new IPEndPoint(IPAddress.Parse(currentIP), 9999);
             client = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
             try
             {
@@ -207,6 +202,10 @@ namespace clientForm
                             var userList = (List<Students>)Deserialize(receiveData.data);
                             SetData(userList);
                             break;
+                        case "Send UserFromExcel":
+                            var userListFile = (List<StudentFromExcel>)Deserialize(receiveData.data);
+                            SetData(userListFile);
+                            break;
                         case "Send Subject":
                             var subject = (string)Deserialize(receiveData.data);
                             SetSubject(subject);
@@ -215,6 +214,14 @@ namespace clientForm
                             object timeExam = (object)Deserialize(receiveData.data);
                             int minute = int.Parse(timeExam.ToString());
                             SetTime(timeExam, minute);             
+                            break;
+                        case "Send Decline":
+                            string message = (string)Deserialize(receiveData.data);
+                            this.Invoke(new Action(() => { MessageBox.Show(this, message); }));
+                            break;
+                        case "Send Success":
+                            string messageSuccess = (string)Deserialize(receiveData.data);
+                            this.Invoke(new Action(() => { MessageBox.Show(this, messageSuccess); }));
                             break;
                         default:
                             break;
@@ -231,14 +238,11 @@ namespace clientForm
 
         }
 
-
         delegate void SetTextCallback(string text);
 
         private void SetSubject(string text)
         {
-            // InvokeRequired required compares the thread ID of the
-            // calling thread to the thread ID of the creating thread.
-            // If these threads are different, it returns true.
+          
             if (this.lblMonThi.InvokeRequired)
             {
                 SetTextCallback d = new SetTextCallback(SetSubject);
@@ -251,9 +255,7 @@ namespace clientForm
         }
         private void SetText(string text)
         {
-            // InvokeRequired required compares the thread ID of the
-            // calling thread to the thread ID of the creating thread.
-            // If these threads are different, it returns true.
+        
             if (this.lblDeThi.InvokeRequired)
             {
                 SetTextCallback d = new SetTextCallback(SetText);
@@ -265,9 +267,11 @@ namespace clientForm
             }
         }
 
-        delegate void SetDataSourceCallBack(List<Students> students);
+       
 
-        private void SetData(List<Students> students)
+        delegate void SetDataSourceCallBack(IEnumerable<object> students);
+
+        private void SetData(IEnumerable<object> students)
         {
           
             if (this.cbDSThi.InvokeRequired)
@@ -330,7 +334,7 @@ namespace clientForm
             if(lblMaSo.Text != string.Empty)
             {
                 SendAcceptUser(lblMaSo.Text);
-                MessageBox.Show("Ket noi success!");
+                cmdChapNhan.Enabled = false;
 
             }
             else
@@ -355,7 +359,6 @@ namespace clientForm
            
             }
         }
-
         private void cmdNopBaiThi_Click(object sender, EventArgs e)
         {
             FinishExam();
