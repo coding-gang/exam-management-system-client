@@ -16,16 +16,130 @@ using eManagerSystem.Application;
 namespace clientForm
 {
     public partial class Form1 : Form
-    { 
-     
+    {
+        IPEndPoint IP;
+        Socket client;
+        int counter = 0;
+        System.Timers.Timer countdown; 
         public Form1()
         {
             InitializeComponent();
-        
+            countdown = new System.Timers.Timer();
+            countdown.Interval = 1000;
+            countdown.Elapsed += Countdown_Elapsed;
+        }
+        private void Countdown_Elapsed(object sender, System.Timers.ElapsedEventArgs e)
+        {
+
+            counter -= 1;
+            int minute = counter / 60;
+            int second = counter % 60;
+            SetCounter(minute, second);
+            if (counter == 0)
+            {
+
+
+                countdown.Stop();
+                FinishExam();
+                Close();
+            }
+
+
+        }
+        delegate void SetCounterCallback(int minute, int second);
+        private void SetCounter(int minute, int second)
+        {
+            // InvokeRequired required compares the thread ID of the
+            // calling thread to the thread ID of the creating thread.
+            // If these threads are different, it returns true.
+            if (this.lblDeThi.InvokeRequired)
+            {
+                SetCounterCallback d = new SetCounterCallback(SetCounter);
+                this.Invoke(d, new object[] { minute, second });
+            }
+
+            else
+            {
+                this.lblThoiGianConLai.Text = minute + " : " + second; ;
+            }
         }
 
-        IPEndPoint IP;
-        Socket client;
+
+        delegate void SetTimeCallback(object time, int mintute);
+
+
+        private void SetTime(object time, int minute)
+        {
+            // InvokeRequired required compares the thread ID of the
+            // calling thread to the thread ID of the creating thread.
+            // If these threads are different, it returns true.
+            if (this.lblThoiGian.InvokeRequired)
+            {
+                SetTimeCallback d = new SetTimeCallback(SetTime);
+                this.Invoke(d, new object[] { time, minute });
+            }
+
+            else
+            {
+
+                this.lblThoiGian.Text = time.ToString() + " Phút";
+                counter = minute * 60;
+
+                countdown.Enabled = true;
+            }
+        }
+        private void FinishExam()
+        {
+            try
+            {
+
+                var PathName = @"D:\odiaZ";
+                string nameDic = Directory.GetDirectories(PathName).FirstOrDefault();
+
+
+                SendToServer(nameDic);
+            }
+            catch
+            {
+                MessageBox.Show("Loi mo file");
+            }
+        }
+        public void SendToServer(string filePath)
+        {
+            try
+            {
+                if (filePath != String.Empty)
+                {
+                    SendData serverReponse = new SendData();
+                    
+                    serverReponse.option = Serialize("Send Exam");
+                    serverReponse.data = Serialize(GetFilePath(filePath));
+                    client.Send(Serialize(serverReponse));
+                    MessageBox.Show("Nộp bài thành công");
+                }
+
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
+
+
+        }
+
+        public byte[] GetFilePath(string filePath)
+        {
+           
+            byte[] fNameByte = Encoding.ASCII.GetBytes(filePath);
+            string nameFile = Directory.EnumerateFiles(filePath).FirstOrDefault();
+            byte[] fileData = File.ReadAllBytes(nameFile);
+            byte[] serverData = new byte[4 + fNameByte.Length + fileData.Length];
+            byte[] fNameLength = BitConverter.GetBytes(fNameByte.Length);
+            fNameLength.CopyTo(serverData, 0);
+            fNameByte.CopyTo(serverData, 4);
+            fileData.CopyTo(serverData, 4 + fNameByte.Length);
+            return serverData;
+        }
         public void Connect()
         {
 
@@ -96,6 +210,11 @@ namespace clientForm
                         case "Send Subject":
                             var subject = (string)Deserialize(receiveData.data);
                             SetSubject(subject);
+                            break;
+                        case "Send BeginExam":
+                            object timeExam = (object)Deserialize(receiveData.data);
+                            int minute = int.Parse(timeExam.ToString());
+                            SetTime(timeExam, minute);             
                             break;
                         default:
                             break;
@@ -235,6 +354,11 @@ namespace clientForm
                 }
            
             }
+        }
+
+        private void cmdNopBaiThi_Click(object sender, EventArgs e)
+        {
+            FinishExam();
         }
     }
 
