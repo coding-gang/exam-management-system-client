@@ -27,6 +27,9 @@ namespace clientForm
             countdown = new System.Timers.Timer();
             countdown.Interval = 1000;
             countdown.Elapsed += Countdown_Elapsed;
+            cmdChapNhan.Enabled = false;
+            cmdNopBaiThi.Enabled = false;
+            cbDSThi.Enabled = false;
         }
         private void Countdown_Elapsed(object sender, System.Timers.ElapsedEventArgs e)
         {
@@ -143,6 +146,9 @@ namespace clientForm
             try
             {
                 client.Connect(IP);
+
+                MessageBox.Show("Connect server success!");
+
             }
             catch
             {
@@ -222,6 +228,16 @@ namespace clientForm
                         case "Send Success":
                             string messageSuccess = (string)Deserialize(receiveData.data);
                             this.Invoke(new Action(() => { MessageBox.Show(this, messageSuccess); }));
+                            break;
+                        case "Send ActiveControl":
+                            string active = (string)Deserialize(receiveData.data);
+                            this.Invoke(new Action(() => {
+                                cmdChapNhan.Enabled = true;
+                                cmdNopBaiThi.Enabled = true;
+                                cbDSThi.Enabled = true;
+
+                            }));
+                         
                             break;
                         default:
                             break;
@@ -333,6 +349,7 @@ namespace clientForm
         {
             if(lblMaSo.Text != string.Empty)
             {
+               
                 SendAcceptUser(lblMaSo.Text);
                 cmdChapNhan.Enabled = false;
 
