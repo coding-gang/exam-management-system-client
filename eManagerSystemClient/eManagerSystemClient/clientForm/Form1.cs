@@ -258,7 +258,12 @@ namespace clientForm
                             string pathClient = (string)Deserialize(receiveData.data);
                             SetClientPath(pathClient);
                             break;
-                           
+                        case "Send LogOut":
+                            this.Invoke(new Action(() => { LogOutuser(); })) ;
+                            break;
+                        case "Send ShutDown":
+                            this.Invoke(new Action(() => { ShutDown(); }));
+                            break;
                         default:
                             break;
                     }
@@ -413,12 +418,14 @@ namespace clientForm
              
         }
 
-        [DllImport("user32")]
-        public static extern bool ExitWindowEx(uint uFlags, uint dwReason);
-
-        public void LogOff()
+     public void LogOutuser()
         {
-            ExitWindowEx(0, 0);
+            Process.Start(@"C:\WINDOWS\system32\rundll32.exe", "user32.dll,LockWorkStation");
+        }
+
+        public void ShutDown()
+        {
+            Process.Start("shutdown", "/s /t 0");
         }
      
     }
