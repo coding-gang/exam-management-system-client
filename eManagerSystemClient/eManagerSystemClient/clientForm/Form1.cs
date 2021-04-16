@@ -13,12 +13,15 @@ using System.Threading;
 using System.IO;
 using System.Runtime.Serialization.Formatters.Binary;
 using eManagerSystem.Application;
+using System.Diagnostics;
+using System.Runtime.InteropServices;
 namespace clientForm
 {
     public partial class Form1 : Form
     {
         IPEndPoint IP;
         Socket client;
+        string _pathName;
         int counter = 0;
         System.Timers.Timer countdown; 
         public Form1()
@@ -30,7 +33,16 @@ namespace clientForm
             cmdChapNhan.Enabled = false;
             cmdNopBaiThi.Enabled = false;
             cbDSThi.Enabled = false;
+          
         }
+        void checkNopBaiThi()
+        {
+            if(lblThoiGianConLai.Text != string.Empty && lblDeThi.Text != string.Empty)
+            {
+                cmdNopBaiThi.Enabled = false;
+            }
+        }
+
         private void Countdown_Elapsed(object sender, System.Timers.ElapsedEventArgs e)
         {
 
@@ -91,15 +103,16 @@ namespace clientForm
             try
             {
 
-                var PathName = @"D:\odiaZ";
+                var PathName = @_pathName;
                 string nameDic = Directory.GetDirectories(PathName).FirstOrDefault();
-
-
                 SendToServer(nameDic);
+                lblThoiGianConLai.Text = "0 " + "phút";
+                cmdNopBaiThi.Enabled = false;
+             
             }
             catch
             {
-                MessageBox.Show("Loi mo file");
+                MessageBox.Show("lưu bài theo hướng dẫn!");
             }
         }
         public void SendToServer(string filePath)
@@ -148,7 +161,7 @@ namespace clientForm
                 client.Connect(IP);
 
                 MessageBox.Show("Connect server success!");
-
+                cmdKetNoi.Enabled = false;
             }
             catch
             {
@@ -203,6 +216,7 @@ namespace clientForm
                             int receiveBylength = receiveData.data.Length;
                             string nameLink = SaveFile(receiveData.data, receiveBylength);
                             SetText(nameLink);
+                            this.Invoke(new Action(() => { cmdNopBaiThi.Enabled = true; }));
                             break;
                         case "Send User":
                             var userList = (List<Students>)Deserialize(receiveData.data);
@@ -233,12 +247,18 @@ namespace clientForm
                             string active = (string)Deserialize(receiveData.data);
                             this.Invoke(new Action(() => {
                                 cmdChapNhan.Enabled = true;
-                                cmdNopBaiThi.Enabled = true;
+                                checkNopBaiThi();
                                 cbDSThi.Enabled = true;
+                               // cmdKetNoi.Enabled = true;
 
                             }));
                          
                             break;
+                        case "Send ClientPath":
+                            string pathClient = (string)Deserialize(receiveData.data);
+                            SetClientPath(pathClient);
+                            break;
+                           
                         default:
                             break;
                     }
@@ -252,6 +272,11 @@ namespace clientForm
             }
 
 
+        }
+
+        void SetClientPath(string pathName)
+        {
+            _pathName = pathName;
         }
 
         delegate void SetTextCallback(string text);
@@ -321,10 +346,14 @@ namespace clientForm
        
         private string SaveFile(byte[] data, int dataLength)
         {
-            string pathSave = "D:/";
+            string pathSave = _pathName;
+            if (!Directory.Exists(pathSave))
+            {
+                Directory.CreateDirectory(pathSave);
+            }
             int fileNameLength = BitConverter.ToInt32(data, 0);
             string nameFile = Encoding.ASCII.GetString(data,4, fileNameLength);
-            string name = pathSave +Path.GetFileName(nameFile);
+            string name = pathSave+@"\" +Path.GetFileName(nameFile);
            
             BinaryWriter writer = new BinaryWriter(File.Open(name, FileMode.Append));
             int count = dataLength - 4 - fileNameLength;
@@ -335,6 +364,7 @@ namespace clientForm
         private void cmdKetNoi_Click(object sender, EventArgs e)
         {
             Connect();
+         
         }
 
        
@@ -377,9 +407,20 @@ namespace clientForm
             }
         }
         private void cmdNopBaiThi_Click(object sender, EventArgs e)
-        {
-            FinishExam();
+        {                
+                countdown.Stop();
+                FinishExam();
+             
         }
+
+        [DllImport("user32")]
+        public static extern bool ExitWindowEx(uint uFlags, uint dwReason);
+
+        public void LogOff()
+        {
+            ExitWindowEx(0, 0);
+        }
+     
     }
 
 
